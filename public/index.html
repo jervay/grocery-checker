@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Grocery Price Checker</title>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    input, button { padding: 10px; font-size: 16px; width: 100%; margin-bottom: 10px; }
+    .result { border-bottom: 1px solid #ccc; padding: 10px 0; }
+    img { width: 60px; vertical-align: middle; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h2>NZ Grocery Price Checker</h2>
+  <input id="searchInput" type="text" placeholder="Enter item e.g. milk" />
+  <button onclick="search()">Search</button>
+  <div id="results"></div>
+
+  <script>
+    async function search() {
+      const query = document.getElementById("searchInput").value;
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "Searching...";
+
+      try {
+        const res = await fetch("/api/search?q=" + encodeURIComponent(query));
+        const items = await res.json();
+        resultsDiv.innerHTML = "";
+
+        if (items.length === 0) {
+          resultsDiv.innerHTML = "No results found.";
+        } else {
+          items.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "result";
+            div.innerHTML = `
+              <img src="${item.image}" />
+              <strong>${item.name}</strong><br/>
+              ${item.store} — $${item.price.toFixed(2)}
+            `;
+            resultsDiv.appendChild(div);
+          });
+        }
+      } catch (e) {
+        resultsDiv.innerHTML = "Something went wrong. Try again.";
+      }
+    }
+  </script>
+</body>
+</html>
